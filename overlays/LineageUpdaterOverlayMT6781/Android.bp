@@ -5,7 +5,7 @@
 //
 
 runtime_resource_overlay {
-    name: "LineageUpdaterOverlay",
+    name: "LineageUpdaterOverlayMT6781",
     system_ext_specific: true
 }
 
