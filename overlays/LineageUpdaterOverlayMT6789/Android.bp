@@ -1,0 +1,11 @@
+//
+// Copyright (C) 2023 Woomymy
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
+runtime_resource_overlay {
+    name: "LineageUpdaterOverlayMT6789",
+    system_ext_specific: true
+}
+

@@ -4,6 +4,11 @@ PRODUCT_PACKAGES += \
     LineageUpdaterOverlayMT6781
 endif
 
+ifneq ($(filter yunluo,$(subst lineage_,,$(TARGET_PRODUCT))),)
+PRODUCT_PACKAGES += \
+    LineageUpdaterOverlayMT6789
+endif
+
 PRODUCT_SOONG_NAMESPACES += \
     vendor/extra
 
