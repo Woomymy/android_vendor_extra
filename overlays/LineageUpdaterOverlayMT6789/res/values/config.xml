@@ -5,7 +5,7 @@
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- OTA Setup -->
-    <string name="updater_server_url" translatable="false">https://raw.githubusercontent.com/xiaomi-mt6789-devs/releases/main/{device}/{incr}.json</string>
+    <string name="updater_server_url" translatable="false">https://gitea.woomy.be/xiaomi-mt6789-devs/releases/raw/branch/main/{device}/{incr}.json</string>
     <!-- Chagelogs -->
     <string name="menu_changelog_url" translatable="false">https://github.com/xiaomi-mt6789-devs/releases/releases</string>
 </resources>
