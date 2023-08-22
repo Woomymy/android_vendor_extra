@@ -1,0 +1,9 @@
+<manifest>
+    <remote name="woomy" fetch="https://github.com/woomymy" revision="lineage-20.0" />
+
+    <remove-project name="LineageOS/android_tools_extract-utils" />
+    <remove-project name="LineageOS/android_prebuilts_extract-tools" />
+
+    <project name="android_tools_extract-utils" remote="woomy" path="tools/extract-utils" />
+    <project name="android_prebuilts_extract-tools" remote="woomy" path="prebuilts/extract-tools" />
+</manifest>
