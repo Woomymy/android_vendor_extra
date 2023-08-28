@@ -1,0 +1,61 @@
+From aea1f14db2e3d0605ab01ecf8fae3c3927518945 Mon Sep 17 00:00:00 2001
+From: Woomymy <woomy@woomy.be>
+Date: Mon, 28 Aug 2023 12:32:43 +0200
+Subject: [PATCH] Partially Revert "Settings: Allow using legacy VPN types"
+
+* As of I00f49555bbbc8ccf270056f0e4d1bfdd927ef26d in frameworks/base,
+  VpnManager throws an error when trying to start legacy VPN as it is
+  deprecated for devices launched with android S and newer, let's
+  therefore hide legacy vpn protocols for these devices.
+
+This reverts commit 32585cf3d911bef70cd9bfd3e989125f9cb21115.
+
+Change-Id: I6c891684453ee27b89098f0beffd323866415118
+Signed-off-by: Woomymy <woomy@woomy.be>
+---
+ .../android/settings/vpn2/ConfigDialog.java   | 21 +++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/src/com/android/settings/vpn2/ConfigDialog.java b/src/com/android/settings/vpn2/ConfigDialog.java
+index 5657416784..b0ba192e43 100644
+--- a/src/com/android/settings/vpn2/ConfigDialog.java
++++ b/src/com/android/settings/vpn2/ConfigDialog.java
+@@ -22,6 +22,7 @@ import android.content.Context;
+ import android.content.DialogInterface;
+ import android.content.pm.PackageManager;
+ import android.net.ProxyInfo;
++import android.os.Build;
+ import android.os.Bundle;
+ import android.os.SystemProperties;
+ import android.text.Editable;
+@@ -524,7 +525,27 @@ class ConfigDialog extends AlertDialog implements TextWatcher,
+                 PackageManager.FEATURE_IPSEC_TUNNELS)) {
+             Log.wtf(TAG, "FEATURE_IPSEC_TUNNELS missing from system");
+         }
++        // If the vpn is new or is not already a legacy type,
++        // don't allow the user to set the type to a legacy option.
+ 
++        // Set the mProfile.type to TYPE_IKEV2_IPSEC_USER_PASS if the VPN not exist
++        if (!mExists) {
++            mProfile.type = VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS;
++        }
++
++        if (Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.S) {
++            // Remove all types which are legacy types from the typesList
++            if (!VpnProfile.isLegacyType(mProfile.type)) {
++                for (int i = mAllowedTypes.size() - 1; i >= 0; i--) {
++                    // This must be removed from back to front in order to ensure index consistency
++                    if (VpnProfile.isLegacyType(i)) {
++                        mAllowedTypes.remove(i);
++                    }
++                }
++
++                types = mAllowedTypes.toArray(new String[0]);
++            }
++        }
+         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                 getContext(), android.R.layout.simple_spinner_item, types);
+         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+-- 
+2.41.0
+
