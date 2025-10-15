@@ -9,6 +9,10 @@ PRODUCT_PACKAGES += \
     LineageUpdaterOverlayMT6789
 endif
 
+# Display
+PRODUCT_PRODUCT_PROPERTIES += \
+    persist.sys.activity_anim_perf_override=true
+
 PRODUCT_SOONG_NAMESPACES += \
     vendor/extra
 
