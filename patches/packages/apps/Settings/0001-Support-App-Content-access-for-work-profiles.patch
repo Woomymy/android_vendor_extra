@@ -1,0 +1,90 @@
+From 127ca7fbc9a25fcd2d5269202f19562883e016af Mon Sep 17 00:00:00 2001
+From: Oliver Scott <olivercscott@gmail.com>
+Date: Mon, 10 May 2021 16:35:53 -0400
+Subject: [PATCH] Support "App & Content access" for work profiles
+
+* Used by Bellis
+
+Change-Id: I258e26dbb432e35c61ffaf9dea6f77ad5d103747
+Signed-off-by: Woomymy <woomy@woomy.be>
+---
+ .../settings/users/AppRestrictionsFragment.java      | 12 ++++++++++++
+ .../android/settings/users/UserDetailsSettings.java  | 12 +++++++++++-
+ src/com/android/settings/users/UserSettings.java     |  8 ++++++++
+ 3 files changed, 31 insertions(+), 1 deletion(-)
+
+diff --git a/src/com/android/settings/users/AppRestrictionsFragment.java b/src/com/android/settings/users/AppRestrictionsFragment.java
+index 5b2a86ff..7ca7501a 100644
+--- a/src/com/android/settings/users/AppRestrictionsFragment.java
++++ b/src/com/android/settings/users/AppRestrictionsFragment.java
+@@ -99,6 +99,13 @@ public class AppRestrictionsFragment extends SettingsPreferenceFragment implemen
+     /** Key for extra passed in from calling fragment to indicate if this is a newly created user */
+     public static final String EXTRA_NEW_USER = "new_user";
+ 
++    private static final String MICROG_PACKAGE = "com.google.android.gms";
++    private static final String[] MICROG_PACKAGES = new String[]{
++            "com.google.android.gms",
++            "com.google.android.gsf",
++            "com.android.vending"
++    };
++
+     private boolean mFirstTime = true;
+     private boolean mNewUser;
+     private boolean mAppListChanged;
+@@ -518,6 +525,11 @@ public class AppRestrictionsFragment extends SettingsPreferenceFragment implemen
+                 // If it's not a restricted profile, apply the changes immediately
+                 if (!mRestrictedProfile) {
+                     mHelper.applyUserAppState(packageName, pref.isChecked(), this);
++                    if (packageName.equals(MICROG_PACKAGE)) {
++                        for (String microgPackage : MICROG_PACKAGES) {
++                            mHelper.applyUserAppState(microgPackage, pref.isChecked(), this);
++                        }
++                    }
+                 }
+                 updateAllEntries(pref.getKey(), pref.isChecked());
+             }
+diff --git a/src/com/android/settings/users/UserDetailsSettings.java b/src/com/android/settings/users/UserDetailsSettings.java
+index ec4a4ff2..6eab97f9 100644
+--- a/src/com/android/settings/users/UserDetailsSettings.java
++++ b/src/com/android/settings/users/UserDetailsSettings.java
+@@ -384,7 +384,17 @@ public class UserDetailsSettings extends SettingsPreferenceFragment
+             }
+         }
+ 
+-        if (!mUserManager.isAdminUser()) { // non admin users can't remove users and allow calls
++        final boolean isAdminUser = mUserManager.isAdminUser();
++        final boolean isFullUser = isAdminUser
++                || mUserManager.isUserOfType(UserManager.USER_TYPE_FULL_SECONDARY)
++                || mUserManager.isUserOfType(UserManager.USER_TYPE_FULL_SYSTEM);
++        if (isFullUser && mUserInfo.isManagedProfile()) {
++            removePreference(KEY_ENABLE_TELEPHONY);
++            removePreference(KEY_SWITCH_USER);
++            openAppAndContentAccessScreen(false);
++            finishFragment();
++        }
++        if (!isAdminUser) { // non admin users can't remove users and allow calls
+             removePreference(KEY_ENABLE_TELEPHONY);
+             removePreference(KEY_REMOVE_USER);
+             removePreference(KEY_APP_AND_CONTENT_ACCESS);
+diff --git a/src/com/android/settings/users/UserSettings.java b/src/com/android/settings/users/UserSettings.java
+index aacc11d8..29be7e10 100644
+--- a/src/com/android/settings/users/UserSettings.java
++++ b/src/com/android/settings/users/UserSettings.java
+@@ -408,6 +408,14 @@ public class UserSettings extends SettingsPreferenceFragment
+ 
+         updateUI();
+         mShouldUpdateUserList = false;
++
++        UserHandle userHandle = getIntent().getParcelableExtra(Intent.EXTRA_USER, UserHandle.class);
++        if (userHandle != null) {
++            int userId = userHandle.getIdentifier();
++            if (mUserManager.isManagedProfile(userId)) {
++                openUserDetails(mUserManager.getUserInfo(userId), true);
++            }
++        }
+     }
+ 
+     @Override
+-- 
+2.51.0
+

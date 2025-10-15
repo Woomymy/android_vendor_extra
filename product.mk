@@ -13,6 +13,10 @@ endif
 PRODUCT_PRODUCT_PROPERTIES += \
     persist.sys.activity_anim_perf_override=true
 
+# work profile
+PRODUCT_PACKAGES += \
+    Bellis
+
 PRODUCT_SOONG_NAMESPACES += \
     vendor/extra
 
